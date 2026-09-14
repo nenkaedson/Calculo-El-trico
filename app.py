@@ -7,6 +7,10 @@ st.set_page_config(
     page_title="Cálculo de Proteção (51, 67, 32, 27, 59, 87, 49)", layout="wide"
 )
 
+# 1. Carrega o arquivo style.css que está na mesma pasta
+with open("style.css", "r", encoding="utf-8") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
 # --- INJEÇÃO DE ESTILO CSS GLOBAL E JAVASCRIPT ---
 st.markdown("""
 <style>
@@ -93,13 +97,9 @@ st.markdown("""
 # Título e Subtítulo customizados com HTML e CSS interno
 st.markdown(
     """
-    <div style="font-family: 'Source Sans Pro', sans-serif;">
-        <h1 style="color: #0F172A; font-size: 2.2rem; font-weight: 700; margin-bottom: 5px;">
-            ⚡ Simulador e Cálculo de Proteção de Sistemas Elétricos
-        </h1>
-        <p style="color: #475569; font-size: 1.1rem; margin-top: 0; line-height: 1.5;">
-            Interface para parametrização, cálculo e visualização gráfica de funções de proteção.
-        </p>
+    <div class="header-protecao">
+        <h1 class="titulo-simulador">⚡ Simulador e Cálculo de Proteção de Sistemas Elétricos</h1>
+        <p class="subtitulo-simulador">Interface para parametrização, cálculo e visualização gráfica de funções de proteção.</p>
     </div>
     """, 
     unsafe_allow_html=True
