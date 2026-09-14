@@ -90,9 +90,19 @@ st.markdown("""
 </script>
 """, unsafe_allow_html=True)
 
-st.title("⚡ Simulador e Cálculo de Proteção de Sistemas Elétricos")
+# Título e Subtítulo customizados com HTML e CSS interno
 st.markdown(
-    "Interface para parametrização, cálculo e visualização gráfica de funções de proteção."
+    """
+    <div style="font-family: 'Source Sans Pro', sans-serif;">
+        <h1 style="color: #0F172A; font-size: 2.2rem; font-weight: 700; margin-bottom: 5px;">
+            ⚡ Simulador e Cálculo de Proteção de Sistemas Elétricos
+        </h1>
+        <p style="color: #475569; font-size: 1.1rem; margin-top: 0; line-height: 1.5;">
+            Interface para parametrização, cálculo e visualização gráfica de funções de proteção.
+        </p>
+    </div>
+    """, 
+    unsafe_allow_html=True
 )
 
 # --- DICIONÁRIOS DE CURVAS ---
