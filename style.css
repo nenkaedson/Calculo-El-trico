@@ -1,3 +1,27 @@
+/* Container do cabeçalho */
+.header-protecao {
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+/* Estilo do título principal */
+.titulo-simulador {
+    font-size: 2.2rem !important;
+    color: #1E293B !important; /* Cor grafite escuro */
+    font-weight: 700 !important;
+    margin-bottom: 8px !important;
+}
+
+/* Estilo do subtítulo descritivo */
+.subtitulo-simulador {
+    font-size: 1.1rem !important;
+    color: #64748B !important; /* Cor cinza intermediário */
+    margin-top: 0px !important;
+}
+
+
+
 /* 1. Alarga e fixa a barra lateral usando os seletores modernos do Streamlit */
 [data-testid="stSidebar"], 
 [data-testid="stSidebarCollapseCollapsed"],
