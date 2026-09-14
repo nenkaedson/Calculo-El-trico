@@ -26,7 +26,7 @@
 [data-testid="stSidebar"], 
 [data-testid="stSidebarCollapseCollapsed"],
 .st-emotion-cache-16q9ght {
-    min-width: 420px !important;
+    min-width: 0px !important;
     max-width: 420px !important;
 }
 
