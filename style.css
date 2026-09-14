@@ -1,0 +1,36 @@
+/* 1. Alarga e fixa a barra lateral usando os seletores modernos do Streamlit */
+[data-testid="stSidebar"], 
+[data-testid="stSidebarCollapseCollapsed"],
+.st-emotion-cache-16q9ght {
+    min-width: 420px !important;
+    max-width: 420px !important;
+}
+
+/* 2. Corrige os textos dos botões de rádio para não quebrarem linha */
+.stRadio div[role="radiogroup"] label {
+    display: flex !important;
+    align-items: center !important;
+    white-space: nowrap !important; /* Força o texto a ficar em uma única linha */
+    width: 100% !important;
+}
+
+/* 3. Ajusta o tamanho da fonte das opções (Funções ANSI) */
+.stRadio div[role="radiogroup"] label p {
+    font-size: 14px !important; /* Tamanho ideal para leitura */
+    padding: 2px 0px !important;
+    margin: 0 !important;
+    overflow: visible !important;
+}
+
+/* 4. Ajusta o título do seletor (Selecione a Função...) */
+[data-testid="stWidgetLabel"] p {
+    font-size: 16px !important;
+    font-weight: bold !important;
+    color: #1E3A8A !important;
+}
+
+/* 5. Ajusta o cabeçalho (Parâmetros de Entrada) */
+[data-testid="stSidebar"] h2 {
+    font-size: 20px !important;
+    color: #334155 !important;
+}
