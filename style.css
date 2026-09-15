@@ -1,3 +1,110 @@
+/* Grid Flexbox para os cartões ficarem lado a lado */
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+/* Cartões de Parâmetros e Métricas */
+.card-protecao {
+    background-color: #f8f9fa;
+    border-left: 5px solid #007BFF;
+    border-radius: 6px;
+    padding: 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    flex: 1;
+    min-width: 160px;
+}
+
+.card-protecao h4 {
+    margin: 0 0 4px 0;
+    color: #495057;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.card-protecao p {
+    margin: 0;
+    color: #212529;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.card-protecao span {
+    font-size: 12px;
+    color: #6c757d;
+    font-weight: normal;
+}
+
+/* Alerta de Trip com Animação Pulsante */
+.trip-alert {
+    background-color: #fff5f5;
+    border: 2px solid #dc3545;
+    border-radius: 8px;
+    padding: 16px;
+    color: #a81c1c;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    transition: background-color 0.3s ease;
+}
+
+.trip-alert h3 {
+    margin: 0 0 4px 0;
+    color: #dc3545;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.trip-alert p {
+    margin: 0;
+    font-size: 14px;
+    color: #5c1111;
+    font-weight: 500;
+}
+
+/* Badge de Direção */
+.badge-direcional {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.badge-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.badge-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Estilo do Cabeçalho Superior */
+.header-protecao {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.titulo-simulador {
+    color: #1e293b;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.subtitulo-simulador {
+    color: #64748b;
+    font-size: 15px;
+}
+
+
 /* Container do cabeçalho */
 .header-protecao {
     margin-bottom: 30px;
