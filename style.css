@@ -146,5 +146,5 @@
 /* 5. Ajusta o cabeçalho (Parâmetros de Entrada) */
 [data-testid="stSidebar"] h2 {
     font-size: 20px !important;
-    color: #334155 !important;
+    color: var(--text-color) !important; /* Ajusta automaticamente para branco no fundo escuro */
 }
