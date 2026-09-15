@@ -7,102 +7,22 @@ st.set_page_config(
     page_title="Cálculo de Proteção (51, 67, 32, 27, 59, 87, 49)", layout="wide"
 )
 
-# 1. Carrega o arquivo style.css que está na mesma pasta
-with open("style.css", "r", encoding="utf-8") as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+# 1. Carrega o arquivo de estilos externo isolando o design
+try:
+    with open("style.css", "r", encoding="utf-8") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+except FileNotFoundError:
+    st.warning("Aviso: O arquivo 'style.css' não foi encontrado na pasta do script.")
 
-# --- INJEÇÃO DE ESTILO CSS GLOBAL E JAVASCRIPT ---
-st.markdown("""
-<style>
-    /* Grid Flexbox para os cartões ficarem lado a lado */
-    .card-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 14px;
-        margin-bottom: 20px;
-    }
-    
-    /* Cartões de Parâmetros e Métricas */
-    .card-protecao {
-        background-color: #f8f9fa;
-        border-left: 5px solid #007BFF;
-        border-radius: 6px;
-        padding: 14px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-        flex: 1;
-        min-width: 160px;
-    }
-    .card-protecao h4 {
-        margin: 0 0 4px 0;
-        color: #495057;
-        font-size: 13px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    .card-protecao p {
-        margin: 0;
-        color: #212529;
-        font-size: 22px;
-        font-weight: 700;
-    }
-    .card-protecao span {
-        font-size: 12px;
-        color: #6c757d;
-        font-weight: normal;
-    }
-
-    /* Alerta de Trip com Animação Pulsante */
-    .trip-alert {
-        background-color: #fff5f5;
-        border: 2px solid #dc3545;
-        border-radius: 8px;
-        padding: 166px;
-        padding: 16px;
-        color: #a81c1c;
-        margin-top: 10px;
-        margin-bottom: 15px;
-        transition: background-color 0.3s ease;
-    }
-    .trip-alert h3 { margin: 0 0 4px 0; color: #dc3545; font-size: 18px; font-weight: bold; }
-    .trip-alert p { margin: 0; font-size: 14px; color: #5c1111; font-weight: 500; }
-
-    /* Badge de Direção */
-    .badge-direcional {
-        display: inline-block;
-        padding: 6px 12px;
-        border-radius: 4px;
-        font-size: 13px;
-        font-weight: bold;
-        margin-bottom: 15px;
-    }
-    .badge-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-    .badge-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-</style>
-
-<script>
-    // Efeito JavaScript para alternar a cor do painel de Trip imitando um LED piscante
-    setInterval(function() {
-        var alerts = document.getElementsByClassName('trip-alert');
-        for(var i = 0; i < alerts.length; i++) {
-            if (alerts[i].style.backgroundColor === 'rgb(255, 245, 245)' || alerts[i].style.backgroundColor === '') {
-                alerts[i].style.backgroundColor = '#ffdddd';
-            } else {
-                alerts[i].style.backgroundColor = '#fff5f5';
-            }
-        }
-    }, 500);
-</script>
-""", unsafe_allow_html=True)
-
-# Título e Subtítulo customizados com HTML e CSS interno
+# Título e Subtítulo customizados
 st.markdown(
     """
     <div class="header-protecao">
         <h1 class="titulo-simulador">⚡ Simulador e Cálculo de Proteção de Sistemas Elétricos</h1>
         <p class="subtitulo-simulador">Interface para parametrização, cálculo e visualização gráfica de funções de proteção.</p>
     </div>
-    """, 
-    unsafe_allow_html=True
+    """,
+    unsafe_allow_html=True,
 )
 
 # --- DICIONÁRIOS DE CURVAS ---
