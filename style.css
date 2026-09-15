@@ -106,7 +106,7 @@
 /* Estilo do subtítulo descritivo */
 .subtitulo-simulador {
     font-size: 1.1rem !important;
-    color: #64748B !important; /* Cor cinza intermediário */
+    color: var(--secondary-text-color) !important; /* Adapta-se automaticamente ao tema da tela */
     margin-top: 0px !important;
 }
 
