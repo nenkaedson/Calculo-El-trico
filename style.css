@@ -87,23 +87,6 @@
 }
 
 /* Estilo do Cabeçalho Superior */
-.header-protecao {
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #e9ecef;
-}
-
-.titulo-simulador {
-    color: #1e293b;
-    font-size: 28px;
-    font-weight: 700;
-}
-
-.subtitulo-simulador {
-    color: #64748b;
-    font-size: 15px;
-}
-
 
 /* Container do cabeçalho */
 .header-protecao {
