@@ -6,23 +6,36 @@ import streamlit as st
 st.set_page_config(
     page_title="Cálculo de Proteção (51, 67, 32, 27, 59, 87, 49)", layout="wide"
 )
+# 1. Carrega o arquivo style.css que está na mesma pasta
+with open("style.css", "r", encoding="utf-8") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# 1. Carrega o arquivo de estilos externo isolando o design
-try:
-    with open("style.css", "r", encoding="utf-8") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-except FileNotFoundError:
-    st.warning("Aviso: O arquivo 'style.css' não foi encontrado na pasta do script.")
+# --- INJEÇÃO EXCLUSIVA DE JAVASCRIPT ---
+st.markdown("""
+<script>
+    // Efeito JavaScript para alternar a cor do painel de Trip imitando um LED piscante
+    setInterval(function() {
+        var alerts = document.getElementsByClassName('trip-alert');
+        for(var i = 0; i < alerts.length; i++) {
+            if (alerts[i].style.backgroundColor === 'rgb(255, 245, 245)' || alerts[i].style.backgroundColor === '') {
+                alerts[i].style.backgroundColor = '#ffdddd';
+            } else {
+                alerts[i].style.backgroundColor = '#fff5f5';
+            }
+        }
+    }, 500);
+</script>
+""", unsafe_allow_html=True)
 
-# Título e Subtítulo customizados
+# Título e Subtítulo customizados com HTML (Estilizados pelo style.css externo)
 st.markdown(
     """
     <div class="header-protecao">
         <h1 class="titulo-simulador">⚡ Simulador e Cálculo de Proteção de Sistemas Elétricos</h1>
         <p class="subtitulo-simulador">Interface para parametrização, cálculo e visualização gráfica de funções de proteção.</p>
     </div>
-    """,
-    unsafe_allow_html=True,
+    """, 
+    unsafe_allow_html=True
 )
 
 # --- DICIONÁRIOS DE CURVAS ---
