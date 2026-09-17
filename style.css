@@ -101,21 +101,17 @@
 /* Estilo do título principal */
 .titulo-simulador {
     font-size: 2.2rem !important;
-    color: #1FFFFFF !important; /* Fica sempre branco, ideal para o fundo preto */
+    color: #f6f6f6 !important; /* Fica sempre branco, ideal para o fundo preto */
     font-weight: 900 !important;
     margin-bottom: 8px !important;
-     margin-top: 0px !important;/* Garante que nenhuma margem empurre o título para baixo */
+    margin-top: 0px !important;/* Garante que nenhuma margem empurre o título para baixo */
 }
-
 /* Estilo do subtítulo descritivo */
 .subtitulo-simulador {
     font-size: 1.1rem !important;
     color: var(--secondary-text-color) !important; /* Adapta-se automaticamente ao tema da tela */
     margin-top: 0px !important;
 }
-
-
-
 /* 1. Alarga e fixa a barra lateral usando os seletores modernos do Streamlit */
 [data-testid="stSidebar"], 
 [data-testid="stSidebarCollapseCollapsed"],
