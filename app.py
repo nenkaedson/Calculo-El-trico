@@ -83,26 +83,68 @@ funcao = st.sidebar.radio(
 col1, col2 = st.columns([1, 1.3])
 
 # --- LÓGICA DAS FUNÇÕES DE CORRENTE (51 / 67) ---
-if funcao in ["ANSI 51 (Sobrecorrente Temporizada)", "ANSI 67 (Sobrecorrente Direcional)"]:
-    padrao_curva = st.sidebar.selectbox("Norma da Curva:", ["IEC", "IEEE/ANSI", "IAC"])
+if funcao in [
+    "ANSI 51 (Sobrecorrente Temporizada)",
+    "ANSI 67 (Sobrecorrente Direcional)",
+]:
+    padrao_curva = st.sidebar.selectbox(
+        "Norma da Curva:", ["IEC", "IEEE/ANSI", "IAC"]
+    )
     if padrao_curva == "IEC":
-        tipo_curva = st.sidebar.selectbox("Tipo de Curva (IEC):", list(CURVAS_IEC.keys()))
-        tms = st.sidebar.number_input("Dial de Tempo (TMS):", min_value=0.01, max_value=1.5, value=0.10, step=0.01)
+        tipo_curva = st.sidebar.selectbox(
+            "Tipo de Curva (IEC):", list(CURVAS_IEC.keys())
+        )
+        tms = st.sidebar.number_input(
+            "Dial de Tempo (TMS):",
+            min_value=0.01,
+            max_value=1.5,
+            value=0.10,
+            step=0.01,
+        )
     elif padrao_curva == "IEEE/ANSI":
-        tipo_curva = st.sidebar.selectbox("Tipo de Curva (ANSI/IEEE):", list(CURVAS_ANSI.keys()))
-        tms = st.sidebar.number_input("Dial de Tempo (TD):", min_value=0.1, max_value=15.0, value=1.0, step=0.01)
+        tipo_curva = st.sidebar.selectbox(
+            "Tipo de Curva (ANSI/IEEE):", list(CURVAS_ANSI.keys())
+        )
+        tms = st.sidebar.number_input(
+            "Dial de Tempo (TD):",
+            min_value=0.1,
+            max_value=15.0,
+            value=1.0,
+            step=0.01,
+        )
     else:
-        tipo_curva = st.sidebar.selectbox("Tipo de Curva (IAC):", list(CURVAS_IAC.keys()))
-        tms = st.sidebar.number_input("Dial de Tempo (TD):", min_value=0.1, max_value=15.0, value=1.0, step=0.01)
+        tipo_curva = st.sidebar.selectbox(
+            "Tipo de Curva (IAC):", list(CURVAS_IAC.keys())
+        )
+        tms = st.sidebar.number_input(
+            "Dial de Tempo (TD):",
+            min_value=0.1,
+            max_value=15.0,
+            value=1.0,
+            step=0.01,
+        )
 
-    i_set = st.sidebar.number_input("Corrente de Partida (A):", min_value=0.1, value=3.00, step=0.5)
-    i_curto = st.sidebar.number_input("Corrente de Curto Simulado (A):", min_value=0.1, value=6.00, step=0.01)
-    i_inst = st.sidebar.number_input("Corrente do Instantâneo (A) [0=Off]:", min_value=0.0, value=15.00, step=1.0)
+    i_set = st.sidebar.number_input(
+        "Corrente de Partida (A):", min_value=0.1, value=3.00, step=0.5
+    )
+    i_curto = st.sidebar.number_input(
+        "Corrente de Curto Simulado (A):", min_value=0.1, value=6.00, step=0.01
+    )
+    i_inst = st.sidebar.number_input(
+        "Corrente do Instantâneo (A) [0=Off]:",
+        min_value=0.0,
+        value=15.00,
+        step=1.0,
+    )
     
     if funcao == "ANSI 67 (Sobrecorrente Direcional)":
         st.sidebar.subheader("📐 Parâmetros Direcionais (67)")
-        mta = st.sidebar.slider("Ângulo de Máximo Torque - MTA (°):", -180, 180, 45)
-        angulo_falha = st.sidebar.slider("Ângulo da Corrente de Falha (°):", -180, 180, 30)
+        mta = st.sidebar.slider(
+            "Ângulo de Máximo Torque - MTA (°):", -180, 180, 45
+        )
+        angulo_falha = st.sidebar.slider(
+            "Ângulo da Corrente de Falha (°):", -180, 180, 30
+        )
 
     multiplo = i_curto / i_set
     zona_operacao = True
@@ -115,12 +157,17 @@ if funcao in ["ANSI 51 (Sobrecorrente Temporizada)", "ANSI 67 (Sobrecorrente Dir
         st.subheader(f"📊 Resultados da {funcao[:7]}")
         st.info("Fórmula Utilizada:")
         if padrao_curva == "IEC":
-            st.latex(r"t = TMS \cdot \left[ \frac{k}{(I_{medida}/I_{partida})^{\alpha} - 1} \right]")
+            st.latex(
+                r"t = TMS \cdot \left[ \frac{k}{(I_{medida}/I_{partida})^{\alpha} - 1} \right]"
+            )
         else:
-            st.latex(r"t = TD \cdot \left[ \frac{A}{(I_{medida}/I_{partida})^{P} - 1} + B \right]")
+            st.latex(
+                r"t = TD \cdot \left[ \frac{A}{(I_{medida}/I_{partida})^{P} - 1} + B \right]"
+            )
 
         # Grid HTML/CSS para substituição dos st.metric tradicionais
-        st.markdown(f"""
+        st.markdown(
+            f"""
         <div class='card-container'>
             <div class='card-protecao'>
                 <h4>Ajuste de Partida</h4>
@@ -133,72 +180,267 @@ if funcao in ["ANSI 51 (Sobrecorrente Temporizada)", "ANSI 67 (Sobrecorrente Dir
                 </div>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
 
         if funcao == "ANSI 67 (Sobrecorrente Direcional)":
             if zona_operacao:
-                st.markdown("<div class='badge-direcional badge-success'>🎯 Direção de AVANÇO (Forward) - Falha na Zona de Operação</div>", unsafe_allow_html=True)
+                st.markdown(
+                    "<div class='badge-direcional badge-success'>🎯 Direção de AVANÇO (Forward) - Falha na Zona de Operação</div>",
+                    unsafe_allow_html=True,
+                )
             else:
-                st.markdown("<div class='badge-direcional badge-error'>🔒 Direção de RECUO (Reverse) - Relé Bloqueado</div>", unsafe_allow_html=True)
+                st.markdown(
+                    "<div class='badge-direcional badge-error'>🔒 Direção de RECUO (Reverse) - Relé Bloqueado</div>",
+                    unsafe_allow_html=True,
+                )
 
         tempo_calculado = None
         if multiplo <= 1.0:
             st.warning("⚠️ Corrente abaixo do ajuste de partida. Sem atuação.")
         elif not zona_operacao:
-            st.info("ℹ️ Relé direcional bloqueado por ângulo. Atuação infinita.")
+            st.info(
+                "ℹ️ Relé direcional bloqueado por ângulo. Atuação infinita."
+            )
         elif i_inst > 0 and i_curto >= i_inst:
             tempo_calculado = 0.015
-            st.markdown(f"""
+            st.markdown(
+                f"""
             <div class='trip-alert'>
                 <h3>💥 ATUADO POR INSTANTÂNEO ({funcao[:4].replace('67','67I').replace('51','50')})</h3>
                 <p>O nível de curto superou o limite do elemento instantâneo. Disparo disparado em {tempo_calculado*1000:.0f} ms.</p>
             </div>
-            """, unsafe_allow_html=True)
+            """,
+                unsafe_allow_html=True,
+            )
         else:
             if padrao_curva == "IEC":
-                tempo_calculado = tms * (CURVAS_IEC[tipo_curva]["beta"] / (multiplo**CURVAS_IEC[tipo_curva]["alpha"] - 1))
+                tempo_calculado = tms * (
+                    CURVAS_IEC[tipo_curva]["beta"]
+                    / (multiplo ** CURVAS_IEC[tipo_curva]["alpha"] - 1)
+                )
             elif padrao_curva == "IEEE/ANSI":
                 p = CURVAS_ANSI[tipo_curva]["P"]
-                tempo_calculado = tms * (CURVAS_ANSI[tipo_curva]["A"] / (multiplo**p - 1) + CURVAS_ANSI[tipo_curva]["B"])
+                tempo_calculado = tms * (
+                    CURVAS_ANSI[tipo_curva]["A"] / (multiplo ** p - 1)
+                    + CURVAS_ANSI[tipo_curva]["B"]
+                )
             else:
                 p = CURVAS_IAC[tipo_curva].get("P", 1.0)
-                a, b, c, d, e = CURVAS_IAC[tipo_curva]["A"], CURVAS_IAC[tipo_curva]["B"], CURVAS_IAC[tipo_curva]["C"], CURVAS_IAC[tipo_curva]["D"], CURVAS_IAC[tipo_curva]["E"]
-                base_val = multiplo**p - c
+                a, b, c, d, e = (
+                    CURVAS_IAC[tipo_curva]["A"],
+                    CURVAS_IAC[tipo_curva]["B"],
+                    CURVAS_IAC[tipo_curva]["C"],
+                    CURVAS_IAC[tipo_curva]["D"],
+                    CURVAS_IAC[tipo_curva]["E"],
+                )
+                base_val = multiplo ** p - c
                 if base_val > 0:
-                    tempo_calculado = tms * (a + b / base_val + d / (base_val**2) + e / (base_val**3))
+                    tempo_calculado = tms * (
+                        a
+                        + b / base_val
+                        + d / (base_val ** 2)
+                        + e / (base_val ** 3)
+                    )
 
             if tempo_calculado is not None and multiplo > 1.0 and zona_operacao:
-                st.markdown(f"""
+                st.markdown(
+                    f"""
                 <div class='trip-alert' style='border-color: #fd7e14; color: #a04e00; background-color: #fffaf5;'>
                     <h3>⏳ DISPARO TEMPORIZADO EM CURVA</h3>
                     <p>Tempo estimado de atuação: <strong>{tempo_calculado:.4f} segundos</strong>.</p>
                 </div>
-                """, unsafe_allow_html=True)
+                """,
+                    unsafe_allow_html=True,
+                )
 
     with col2:
         st.subheader("📈 Curva de Tempo de Atuação (Tempo Inverso)")
         multiplos_eixo = np.linspace(1.1, 20, 200)
         plt.figure(figsize=(7, 4.5))
         if padrao_curva == "IEC":
-            tempos_eixo = tms * (CURVAS_IEC[tipo_curva]["beta"] / (multiplos_eixo**CURVAS_IEC[tipo_curva]["alpha"] - 1))
+            tempos_eixo = tms * (
+                CURVAS_IEC[tipo_curva]["beta"]
+                / (multiplos_eixo ** CURVAS_IEC[tipo_curva]["alpha"] - 1)
+            )
         elif padrao_curva == "IEEE/ANSI":
             p = CURVAS_ANSI[tipo_curva]["P"]
-            tempos_eixo = tms * (CURVAS_ANSI[tipo_curva]["A"] / (multiplos_eixo**p - 1) + CURVAS_ANSI[tipo_curva]["B"])
+            tempos_eixo = tms * (
+                CURVAS_ANSI[tipo_curva]["A"] / (multiplos_eixo ** p - 1)
+                + CURVAS_ANSI[tipo_curva]["B"]
+            )
         else:
             p = CURVAS_IAC[tipo_curva].get("P", 1.0)
-            a, b, c, d, e = CURVAS_IAC[tipo_curva]["A"], CURVAS_IAC[tipo_curva]["B"], CURVAS_IAC[tipo_curva]["C"], CURVAS_IAC[tipo_curva]["D"], CURVAS_IAC[tipo_curva]["E"]
-            base_eixo = multiplos_eixo**p - c
-            tempos_eixo = tms * (a + b / base_eixo + d / (base_eixo**2) + e / (base_eixo**3))
+            a, b, c, d, e = (
+                CURVAS_IAC[tipo_curva]["A"],
+                CURVAS_IAC[tipo_curva]["B"],
+                CURVAS_IAC[tipo_curva]["C"],
+                CURVAS_IAC[tipo_curva]["D"],
+                CURVAS_IAC[tipo_curva]["E"],
+            )
+            base_eixo = multiplos_eixo ** p - c
+            tempos_eixo = tms * (
+                a
+                + b / base_eixo
+                + d / (base_eixo ** 2)
+                + e / (base_eixo ** 3)
+            )
 
         plt.plot(multiplos_eixo, tempos_eixo, label=tipo_curva, color="#007BFF", lw=2)
         if multiplo > 1.0 and zona_operacao:
-            plt.scatter([multiplo], [tempo_calculado], color="red", zorder=5, s=100, label=f"Ponto de Falha ({multiplo:.2f}x, {tempo_calculado:.3f}s)")
+            plt.scatter(
+                [multiplo],
+                [tempo_calculado],
+                color="red",
+                zorder=5,
+                s=100,
+                label=f"Ponto de Falha ({multiplo:.2f}x, {tempo_calculado:.3f}s)",
+            )
         plt.xlabel("Múltiplo de Partida (I / I_set)")
         plt.ylabel("Tempo de Atuação (segundos)")
         plt.yscale("log")
         plt.grid(True, which="both", ls="--", alpha=0.5)
         plt.legend()
         st.pyplot(plt.gcf())
+        plt.close() 
+# --- DIAGRAMA POLAR EXCLUSIVO DA FUNÇÃO ANSI 67 ---
+    if funcao == "ANSI 67 (Sobrecorrente Direcional)":
+        st.write("---")
+        st.subheader("📐 Diagrama Fasorial com Lógica Direcional Integrada")
+
+    # Layout em duas colunas: Gráfico à esquerda, parâmetros à direita
+    col_grafico, col_controles = st.columns([1.2, 1])
+
+    with col_controles:
+        st.markdown("### ⚙️ Parâmetros de Ajuste (MTA)")
+        # Ângulo de Torque Máximo para definir a inclinação das zonas direcionais
+        mta = st.number_input("Ângulo de Torque Máximo (MTA °)", min_value=-180.0, max_value=180.0, value=45.0, step=5.0)
+        
+        st.markdown("### ⚡ Parâmetros da Falta (Curto)")
+        isc_mag = st.number_input("Magnitude do Curto (Isc)", min_value=0.0, value=120.0, step=10.0)
+        isc_ang = st.number_input("Ângulo do Curto (°)", min_value=-360.0, max_value=360.0, value=-45.0, step=5.0)
+        
+        st.markdown("---")
+        st.markdown("### 🎛️ Seleção de Visibilidade")
+        
+        # Valores de regime baseados no seu sistema
+        va_mag, va_ang = 66.4, 0
+        vb_mag, vb_ang = 66.4, -120
+        vc_mag, vc_ang = 66.4, 120
+
+        ia_mag, ia_ang = 40.0, -30  
+        ib_mag, ib_ang = 40.0, -150
+        ic_mag, ic_ang = 40.0, 90
+
+        # Checkboxes para ligar/desligar fasores de forma independente
+        st.write("**Zonas de Proteção**")
+        exibir_zonas = st.checkbox("🎨 Exibir Fundo Direto/Reverso", value=True)
+
+        st.write("**Tensões**")
+        exibir_va = st.checkbox("🟠 Exibir Va", value=True)
+        exibir_vb = st.checkbox("🟣 Exibir Vb", value=True)
+        exibir_vc = st.checkbox("🟢 Exibir Vc", value=True)
+
+        st.write("**Correntes Nominais**")
+        exibir_ia = st.checkbox("🔴 Exibir Ia", value=True)
+        exibir_ib = st.checkbox("🟢 Exibir Ib", value=True)
+        exibir_ic = st.checkbox("🔵 Exibir Ic", value=True)
+
+        st.write("**Falta**")
+        exibir_isc = st.checkbox("🔥 Exibir Corrente de Curto (Isc)", value=True)
+
+    with col_grafico:
+        # 1. Configuração Inicial do Gráfico Polar
+        fig, ax = plt.subplots(figsize=(6, 6), subplot_kw={"projection": "polar"})
+        ax.set_theta_zero_location("E")  # 0° na horizontal direita (Leste)
+        
+        # Converte ângulos importantes para radianos
+        mta_rad = np.radians(mta)
+        falha_rad = np.radians(isc_ang)
+
+        # 2. Definição Dinâmica da Escala do Raio Máximo
+        valores_ativos = [
+            va_mag if exibir_va else 0, vb_mag if exibir_vb else 0, vc_mag if exibir_vc else 0,
+            ia_mag if exibir_ia else 0, ib_mag if exibir_ib else 0, ic_mag if exibir_ic else 0,
+            isc_mag if exibir_isc else 0
+        ]
+        raio_max = max(valores_ativos) if max(valores_ativos) > 0 else 1.0
+        r_limite = raio_max * 1.25
+        ax.set_rmax(r_limite)
+
+        # 3. Renderização de Fundo: Zonas Direta, Reversa e Linhas de Fronteira (Quadratura)
+        if exibir_zonas:
+            # Constrói os arcos de 180° que dividem as duas metades do gráfico
+            abertura_direta = np.linspace(mta_rad - np.pi / 2, mta_rad + np.pi / 2, 100)
+            abertura_reversa = np.linspace(mta_rad + np.pi / 2, mta_rad + 3 * np.pi / 2, 100)
+            r_fundo = np.ones(100) * r_limite
+
+            # Preenche o fundo com transparência suave (alpha) para não sumir com as setas
+            ax.fill_between(abertura_direta, 0, r_fundo, color="green", alpha=0.08, label="Zona Direta (Forward)")
+            ax.fill_between(abertura_reversa, 0, r_fundo, color="red", alpha=0.04, label="Zona Reversa (Reverse)")
+
+            # Linha tracejada do Ângulo de Torque Máximo (MTA)
+            ax.plot([mta_rad, mta_rad], [0, r_limite], color="darkgreen", lw=2.0, ls="--", label=f"Linha MTA ({mta}°)")
+            # Linha ortogonal pontilhada representando a Fronteira Direcional da Quadratura
+            ax.plot([mta_rad - np.pi/2, mta_rad + np.pi/2], [r_limite, r_limite], color="black", lw=1.5, ls=":", label="Fronteira 90°")
+
+        # 4. Paleta de Cores Mapeada do seu Software de Referência
+        cores_tensoes = {"a": "#E67E22", "b": "#9B59B6", "c": "#1ABC9C"}  # Laranja, Roxo, Verde Água
+        cores_correntes = {"a": "#C0392B", "b": "#27AE60", "c": "#2980B9"} # Vermelho, Verde, Azul
+        cor_curto = "#FF5722"  # Laranja Elétrico para destacar o vetor de falta
+
+        # Função interna para desenhar os fasores
+        def desenhar_vetor(magnitude, angulo_graus, cor, nome, largura=2.5):
+            rad = np.radians(angulo_graus)
+            ax.annotate(
+                "",
+                xy=(rad, magnitude),
+                xytext=(0, 0),
+                arrowprops=dict(
+                    facecolor=cor, 
+                    edgecolor=cor, 
+                    arrowstyle="->", 
+                    lw=largura, 
+                    shrinkA=0, 
+                    shrinkB=0
+                ),
+            )
+            ax.text(rad, magnitude * 1.08, nome, color=cor, weight="bold", fontsize=9, ha="center", va="center")
+
+        # 5. Plotagem das Tensões (Va, Vb, Vc) de acordo com a seleção
+        if exibir_va and va_mag > 0: desenhar_vetor(va_mag, va_ang, cores_tensoes["a"], "Va")
+        if exibir_vb and vb_mag > 0: desenhar_vetor(vb_mag, vb_ang, cores_tensoes["b"], "Vb")
+        if exibir_vc and vc_mag > 0: desenhar_vetor(vc_mag, vc_ang, cores_tensoes["c"], "Vc")
+
+        # 6. Plotagem das Correntes Nominais (Ia, Ib, Ic) de acordo com a seleção
+        if exibir_ia and ia_mag > 0: desenhar_vetor(ia_mag, ia_ang, cores_correntes["a"], "Ia")
+        if exibir_ib and ib_mag > 0: desenhar_vetor(ib_mag, ib_ang, cores_correntes["b"], "Ib")
+        if exibir_ic and ic_mag > 0: desenhar_vetor(ic_mag, ic_ang, cores_correntes["c"], "Ic")
+
+        # 7. Plotagem da Corrente de Curto Simulada (Vetor mais espesso)
+        if exibir_isc and isc_mag > 0:
+            desenhar_vetor(isc_mag, isc_ang, cor_curto, f"Isc ({isc_mag}A)", largura=4.0)
+
+        # 8. Limpeza Visual e Ajustes Estéticos Finais
+        ax.set_yticklabels([]) 
+        ax.set_xticks(np.radians([0, 90, 180, 270]))
+        ax.set_xticklabels(["0°", "90°", "180°", "270°"], color="gray", fontsize=9)
+        ax.grid(True, alpha=0.3, color="#BDC3C7", ls="--")
+        
+        # Reposiciona a legenda para baixo do gráfico de forma organizada
+        ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.35), ncol=2, fontsize=8)
+
+        # Renderização no Streamlit
+        st.pyplot(fig)
+        plt.close()
+
+        # 9. Lógica de Diagnóstico Automatizada por Texto
+        diff_angular = np.arctan2(np.sin(falha_rad - mta_rad), np.cos(falha_rad - mta_rad))
+        if np.abs(diff_angular) <= np.pi / 2:
+            st.success(f"✅ **Análise Direcional:** O vetor de curto-circuito (Isc) está posicionado na **Zona Direta (Forward)**.")
+        else:
+            st.error(f"❌ **Análise Direcional:** O vetor de curto-circuito (Isc) está posicionado na **Zona Reversa (Reverse)**. Função 67 bloqueada.")
 
 # --- LÓGICA DA FUNÇÃO DE POTÊNCIA (32) ---
 elif funcao == "ANSI 32 (Potência Inversa)":
