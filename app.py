@@ -4,7 +4,9 @@ import pandas as pd
 import streamlit as st
 
 st.set_page_config(
-    page_title="Cálculo de Proteção (51, 67, 32, 27, 59, 87, 49)", layout="wide"
+    page_title="Cálculo de Proteção (51, 67, 32, 27, 59, 87, 49)",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 # 1. Carrega o arquivo style.css que está na mesma pasta
 with open("style.css", "r", encoding="utf-8") as f:
@@ -72,6 +74,7 @@ funcao = st.sidebar.radio(
     [
         "ANSI 51 (Sobrecorrente Temporizada)",
         "ANSI 67 (Sobrecorrente Direcional)",
+        "ANSI 67N (Sobrecorrente Direcional de Terra)",
         "ANSI 32 (Potência Inversa)",
         "ANSI 27 (Subtensão)",
         "ANSI 59 (Sobretensão)",
@@ -86,6 +89,7 @@ col1, col2 = st.columns([1, 1.3])
 if funcao in [
     "ANSI 51 (Sobrecorrente Temporizada)",
     "ANSI 67 (Sobrecorrente Direcional)",
+    "ANSI 67N (Sobrecorrente Direcional de Terra)",
 ]:
     padrao_curva = st.sidebar.selectbox(
         "Norma da Curva:", ["IEC", "IEEE/ANSI", "IAC"]
@@ -137,6 +141,7 @@ if funcao in [
         step=1.0,
     )
     
+    # Parâmetros específicos dos elementos direcionais 67 e 67N
     if funcao == "ANSI 67 (Sobrecorrente Direcional)":
         st.sidebar.subheader("📐 Parâmetros Direcionais (67)")
         mta = st.sidebar.slider(
@@ -145,11 +150,38 @@ if funcao in [
         angulo_falha = st.sidebar.slider(
             "Ângulo da Corrente de Falha (°):", -180, 180, 30
         )
+    elif funcao == "ANSI 67N (Sobrecorrente Direcional de Terra)":
+        st.sidebar.subheader("🌎 Parâmetros Direcionais de Terra (67N)")
+        mta = st.sidebar.slider(
+            "MTA / Ângulo Característico (°):", -180, 180, 45
+        )
+        i0_set = st.sidebar.number_input(
+            "Partida de Corrente Residual 3I0 (A):", min_value=0.01, value=1.00, step=0.10
+        )
+        i0_curto = st.sidebar.number_input(
+            "Corrente Residual de Falta 3I0 (A):", min_value=0.0, value=5.00, step=0.10
+        )
+        angulo_i0 = st.sidebar.slider(
+            "Ângulo de 3I0 (°):", -180, 180, 30
+        )
+        angulo_v0 = st.sidebar.slider(
+            "Ângulo de 3V0 / Polarização (°):", -180, 180, 0
+        )
+        i0_inst = st.sidebar.number_input(
+            "3I0 Instantâneo (A) [0=Off]:", min_value=0.0, value=0.0, step=0.10
+        )
+        i_set = i0_set
+        i_curto = i0_curto
+        i_inst = i0_inst
+        angulo_falha = angulo_i0
 
     multiplo = i_curto / i_set
     zona_operacao = True
-    if funcao == "ANSI 67 (Sobrecorrente Direcional)":
-        diff_angulo = (angulo_falha - mta + 180) % 360 - 180
+    if funcao in ["ANSI 67 (Sobrecorrente Direcional)", "ANSI 67N (Sobrecorrente Direcional de Terra)"]:
+        if funcao == "ANSI 67N (Sobrecorrente Direcional de Terra)":
+            diff_angulo = (angulo_i0 - angulo_v0 - mta + 180) % 360 - 180
+        else:
+            diff_angulo = (angulo_falha - mta + 180) % 360 - 180
         if not (-90 <= diff_angulo <= 90):
             zona_operacao = False
 
@@ -184,7 +216,7 @@ if funcao in [
             unsafe_allow_html=True,
         )
 
-        if funcao == "ANSI 67 (Sobrecorrente Direcional)":
+        if funcao in ["ANSI 67 (Sobrecorrente Direcional)", "ANSI 67N (Sobrecorrente Direcional de Terra)"]:
             if zona_operacao:
                 st.markdown(
                     "<div class='badge-direcional badge-success'>🎯 Direção de AVANÇO (Forward) - Falha na Zona de Operação</div>",
@@ -309,138 +341,355 @@ if funcao in [
         st.write("---")
         st.subheader("📐 Diagrama Fasorial com Lógica Direcional Integrada")
 
-    # Layout em duas colunas: Gráfico à esquerda, parâmetros à direita
-    col_grafico, col_controles = st.columns([1.2, 1])
-
-    with col_controles:
-        st.markdown("### ⚙️ Parâmetros de Ajuste (MTA)")
-        # Ângulo de Torque Máximo para definir a inclinação das zonas direcionais
-        mta = st.number_input("Ângulo de Torque Máximo (MTA °)", min_value=-180.0, max_value=180.0, value=45.0, step=5.0)
+        # Layout em duas colunas: Gráfico à esquerda, parâmetros à direita
+        col_grafico, col_controles = st.columns([1.2, 1])
         
-        st.markdown("### ⚡ Parâmetros da Falta (Curto)")
-        isc_mag = st.number_input("Magnitude do Curto (Isc)", min_value=0.0, value=120.0, step=10.0)
-        isc_ang = st.number_input("Ângulo do Curto (°)", min_value=-360.0, max_value=360.0, value=-45.0, step=5.0)
+
+        with col_controles:
+            st.markdown("### ⚙️ Parâmetros de Ajuste (MTA)")
+            # Ângulo de Torque Máximo para definir a inclinação das zonas direcionais
+            mta = st.number_input("Ângulo de Torque Máximo (MTA °)", min_value=-180.0, max_value=180.0, value=45.0, step=5.0)
         
-        st.markdown("---")
-        st.markdown("### 🎛️ Seleção de Visibilidade")
+            st.markdown("### ⚡ Parâmetros da Falta (Curto)")
+            isc_mag = st.number_input("Magnitude do Curto (Isc)", min_value=0.0, value=120.0, step=10.0)
+            isc_ang = st.number_input("Ângulo do Curto (°)", min_value=-360.0, max_value=360.0, value=-45.0, step=5.0)
         
-        # Valores de regime baseados no seu sistema
-        va_mag, va_ang = 66.4, 0
-        vb_mag, vb_ang = 66.4, -120
-        vc_mag, vc_ang = 66.4, 120
+            st.markdown("---")
+            st.markdown("### 🎛️ Seleção de Visibilidade")
+            st.write("**Zonas de Proteção**")
+            exibir_zonas = st.checkbox("🎨 Exibir Fundo Direto/Reverso",value=True)
 
-        ia_mag, ia_ang = 40.0, -30  
-        ib_mag, ib_ang = 40.0, -150
-        ic_mag, ic_ang = 40.0, 90
+            # Valores de regime baseados no seu sistema
+            st.write("**Tensões**")
+            exibir_va = st.checkbox("🟠 Exibir Va",
+    value=True
+)
+            if exibir_va:
+                col1, col2 = st.columns(2)
+                with col1:
+                        va_mag = st.number_input(
+                            "Va (V)",
+                            min_value=0.0,
+                            value=66.4,
+                            step=0.1,
+                            format="%.2f",
+                            key="va_mag_input"
+        )
+                with col2:
+                        va_ang = st.number_input(
+                        "Ângulo Va (°)",
+                        min_value=-360.0,
+                        max_value=360.0,
+                        value=0.0,
+                        step=1.0,
+                        format="%.1f",
+                        key="va_ang_input"
+        )
+            else:
+                va_mag = 0.0
+                va_ang = 0.0
+            exibir_vb = st.checkbox("🟣 Exibir Vb", value=True)   
+            if exibir_vb:
+                col1, col2 = st.columns(2)
 
-        # Checkboxes para ligar/desligar fasores de forma independente
-        st.write("**Zonas de Proteção**")
-        exibir_zonas = st.checkbox("🎨 Exibir Fundo Direto/Reverso", value=True)
-
-        st.write("**Tensões**")
-        exibir_va = st.checkbox("🟠 Exibir Va", value=True)
-        exibir_vb = st.checkbox("🟣 Exibir Vb", value=True)
-        exibir_vc = st.checkbox("🟢 Exibir Vc", value=True)
-
-        st.write("**Correntes Nominais**")
-        exibir_ia = st.checkbox("🔴 Exibir Ia", value=True)
-        exibir_ib = st.checkbox("🟢 Exibir Ib", value=True)
-        exibir_ic = st.checkbox("🔵 Exibir Ic", value=True)
-
-        st.write("**Falta**")
-        exibir_isc = st.checkbox("🔥 Exibir Corrente de Curto (Isc)", value=True)
-
-    with col_grafico:
-        # 1. Configuração Inicial do Gráfico Polar
-        fig, ax = plt.subplots(figsize=(6, 6), subplot_kw={"projection": "polar"})
-        ax.set_theta_zero_location("E")  # 0° na horizontal direita (Leste)
-        
-        # Converte ângulos importantes para radianos
-        mta_rad = np.radians(mta)
-        falha_rad = np.radians(isc_ang)
-
-        # 2. Definição Dinâmica da Escala do Raio Máximo
-        valores_ativos = [
-            va_mag if exibir_va else 0, vb_mag if exibir_vb else 0, vc_mag if exibir_vc else 0,
-            ia_mag if exibir_ia else 0, ib_mag if exibir_ib else 0, ic_mag if exibir_ic else 0,
-            isc_mag if exibir_isc else 0
-        ]
-        raio_max = max(valores_ativos) if max(valores_ativos) > 0 else 1.0
-        r_limite = raio_max * 1.25
-        ax.set_rmax(r_limite)
-
-        # 3. Renderização de Fundo: Zonas Direta, Reversa e Linhas de Fronteira (Quadratura)
-        if exibir_zonas:
-            # Constrói os arcos de 180° que dividem as duas metades do gráfico
-            abertura_direta = np.linspace(mta_rad - np.pi / 2, mta_rad + np.pi / 2, 100)
-            abertura_reversa = np.linspace(mta_rad + np.pi / 2, mta_rad + 3 * np.pi / 2, 100)
-            r_fundo = np.ones(100) * r_limite
-
-            # Preenche o fundo com transparência suave (alpha) para não sumir com as setas
-            ax.fill_between(abertura_direta, 0, r_fundo, color="green", alpha=0.08, label="Zona Direta (Forward)")
-            ax.fill_between(abertura_reversa, 0, r_fundo, color="red", alpha=0.04, label="Zona Reversa (Reverse)")
-
-            # Linha tracejada do Ângulo de Torque Máximo (MTA)
-            ax.plot([mta_rad, mta_rad], [0, r_limite], color="darkgreen", lw=2.0, ls="--", label=f"Linha MTA ({mta}°)")
-            # Linha ortogonal pontilhada representando a Fronteira Direcional da Quadratura
-            ax.plot([mta_rad - np.pi/2, mta_rad + np.pi/2], [r_limite, r_limite], color="black", lw=1.5, ls=":", label="Fronteira 90°")
-
-        # 4. Paleta de Cores Mapeada do seu Software de Referência
-        cores_tensoes = {"a": "#E67E22", "b": "#9B59B6", "c": "#1ABC9C"}  # Laranja, Roxo, Verde Água
-        cores_correntes = {"a": "#C0392B", "b": "#27AE60", "c": "#2980B9"} # Vermelho, Verde, Azul
-        cor_curto = "#FF5722"  # Laranja Elétrico para destacar o vetor de falta
-
-        # Função interna para desenhar os fasores
-        def desenhar_vetor(magnitude, angulo_graus, cor, nome, largura=2.5):
-            rad = np.radians(angulo_graus)
-            ax.annotate(
-                "",
-                xy=(rad, magnitude),
-                xytext=(0, 0),
-                arrowprops=dict(
-                    facecolor=cor, 
-                    edgecolor=cor, 
-                    arrowstyle="->", 
-                    lw=largura, 
-                    shrinkA=0, 
-                    shrinkB=0
-                ),
+                with col1:
+                    vb_mag = st.number_input(
+                    "Vb (V)",
+                    min_value=0.0,
+                    value=66.4,
+                    step=0.1,
+                    format="%.2f",
+                    key="vb_mag_input"
             )
-            ax.text(rad, magnitude * 1.08, nome, color=cor, weight="bold", fontsize=9, ha="center", va="center")
 
-        # 5. Plotagem das Tensões (Va, Vb, Vc) de acordo com a seleção
-        if exibir_va and va_mag > 0: desenhar_vetor(va_mag, va_ang, cores_tensoes["a"], "Va")
-        if exibir_vb and vb_mag > 0: desenhar_vetor(vb_mag, vb_ang, cores_tensoes["b"], "Vb")
-        if exibir_vc and vc_mag > 0: desenhar_vetor(vc_mag, vc_ang, cores_tensoes["c"], "Vc")
+                    with col2:
+                        vb_ang = st.number_input(
+                        "Ângulo Vb (°)",
+                        min_value=-360.0,
+                        max_value=360.0,
+                        value=-120.0,
+                        step=1.0,
+                        format="%.1f",
+                        key="vb_ang_input"
+        )
+            else:
+                vb_mag = 0.0
+                vb_ang = 0.0
 
-        # 6. Plotagem das Correntes Nominais (Ia, Ib, Ic) de acordo com a seleção
-        if exibir_ia and ia_mag > 0: desenhar_vetor(ia_mag, ia_ang, cores_correntes["a"], "Ia")
-        if exibir_ib and ib_mag > 0: desenhar_vetor(ib_mag, ib_ang, cores_correntes["b"], "Ib")
-        if exibir_ic and ic_mag > 0: desenhar_vetor(ic_mag, ic_ang, cores_correntes["c"], "Ic")
 
-        # 7. Plotagem da Corrente de Curto Simulada (Vetor mais espesso)
-        if exibir_isc and isc_mag > 0:
-            desenhar_vetor(isc_mag, isc_ang, cor_curto, f"Isc ({isc_mag}A)", largura=4.0)
+            exibir_vc = st.checkbox("🟢 Exibir Vc",value=True)
 
-        # 8. Limpeza Visual e Ajustes Estéticos Finais
-        ax.set_yticklabels([]) 
-        ax.set_xticks(np.radians([0, 90, 180, 270]))
-        ax.set_xticklabels(["0°", "90°", "180°", "270°"], color="gray", fontsize=9)
-        ax.grid(True, alpha=0.3, color="#BDC3C7", ls="--")
+            if exibir_vc:
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    vc_mag = st.number_input(
+                    "Vc (V)",
+                    min_value=0.0,
+                    value=66.4,
+                    step=0.1,
+                    format="%.2f",
+                    key="vc_mag_input"
+        )
+
+                with col2:
+                    vc_ang = st.number_input("Ângulo Vc (°)", min_value=-360.0,
+                    max_value=360.0,
+                    value=120.0,
+                    step=1.0,
+                    format="%.1f",
+                    key="vc_ang_input"
+        )
+            else:
+                vc_mag = 0.0
+                vc_ang = 0.0
+
+             # ============================================================
+# CORRENTES
+# ============================================================
+
+            st.write("**Correntes Nominais**")
+
+# ---------- Ia ----------
+            exibir_ia = st.checkbox( "🔴 Exibir Ia",
+    value=True
+)
+
+            if exibir_ia:  
+                col1, col2 = st.columns(2)
+
+                with col1:
+                     ia_mag = st.number_input(
+                    "Ia (A)",
+                    min_value=0.0,
+                    value=40.0,
+                    step=0.1,
+                    format="%.2f",
+                    key="ia_mag_input"
+        )
+
+                with col2:
+                    ia_ang = st.number_input(
+                    "Ângulo Ia (°)",
+                    min_value=-360.0,
+                    max_value=360.0,
+                    value=-30.0,
+                    step=1.0,
+                    format="%.1f",
+                    key="ia_ang_input"
+        )
+            else:
+                ia_mag = 0.0
+                ia_ang = 0.0
+                # ---------- Ib ----------
+            exibir_ib = st.checkbox("🟢 Exibir Ib",
+    value=True
+)
+
+            if exibir_ib:
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    ib_mag = st.number_input(
+                    "Ib (A)",
+                    min_value=0.0,
+                    value=40.0,
+                    step=0.1,
+                    format="%.2f",
+                    key="ib_mag_input"
+        )
+
+                with col2:
+                    ib_ang = st.number_input(
+                    "Ângulo Ib (°)",
+                     min_value=-360.0,
+                    max_value=360.0,
+                    value=-150.0,
+                    step=1.0,
+                    format="%.1f",
+                    key="ib_ang_input"
+        )
+            else:
+                    ib_mag = 0.0
+                    ib_ang = 0.0
+# ---------- Ic ----------
+            exibir_ic = st.checkbox("🔵 Exibir Ic",
+    value=True
+)
+
+            if exibir_ic:
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    ic_mag = st.number_input(
+                    "Ic (A)",
+                    min_value=0.0,
+                    value=40.0,
+                    step=0.1,
+                    format="%.2f",
+                    key="ic_mag_input"
+        )
+
+                with col2:
+                    ic_ang = st.number_input(
+                    "Ângulo Ic (°)",
+                    min_value=-360.0,
+                    max_value=360.0,
+                    value=90.0,
+                    step=1.0,
+                    format="%.1f",
+                    key="ic_ang_input"
+        )
+            else:
+                ic_mag = 0.0
+                ic_ang = 0.0
+
+            # ============================================================
+# FALTA / CORRENTE DE CURTO-CIRCUITO
+# ============================================================
+
+            st.write("**Falta**")
+
+            exibir_isc = st.checkbox("🔥 Exibir Corrente de Curto (Isc)", value=True)
+
+            if exibir_isc:
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    isc_mag = st.number_input(
+                    "Isc (A)",
+                    min_value=0.0,
+                    value=120.0,
+                    step=10.0,
+                    format="%.2f",
+                    key="isc_mag_input"
+        )
+
+                with col2:
+                    isc_ang = st.number_input(
+                    "Ângulo Isc (°)",
+                    min_value=-360.0,
+                    max_value=360.0,
+                    value=-45.0,
+                    step=5.0,
+                    format="%.1f",
+                    key="isc_ang_input"
+        )
+
+            else:
+                    isc_mag = 0.0
+                    isc_ang = 0.0
+
+        with col_grafico:
+            # 1. Configuração Inicial do Gráfico Polar
+            fig, ax = plt.subplots(figsize=(6, 6), subplot_kw={"projection": "polar"})
+            ax.set_theta_zero_location("E")  # 0° na horizontal direita (Leste)
         
-        # Reposiciona a legenda para baixo do gráfico de forma organizada
-        ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.35), ncol=2, fontsize=8)
+            # Converte ângulos importantes para radianos
+            mta_rad = np.radians(mta)
+            falha_rad = np.radians(isc_ang)
 
-        # Renderização no Streamlit
-        st.pyplot(fig)
-        plt.close()
+            # 2. Definição Dinâmica da Escala do Raio Máximo
+            valores_ativos = [
+                va_mag if exibir_va else 0, vb_mag if exibir_vb else 0, vc_mag if exibir_vc else 0,
+                ia_mag if exibir_ia else 0, ib_mag if exibir_ib else 0, ic_mag if exibir_ic else 0,
+                isc_mag if exibir_isc else 0
+            ]
+            raio_max = max(valores_ativos) if max(valores_ativos) > 0 else 1.0
+            r_limite = raio_max * 1.25
+            ax.set_rmax(r_limite)
 
-        # 9. Lógica de Diagnóstico Automatizada por Texto
-        diff_angular = np.arctan2(np.sin(falha_rad - mta_rad), np.cos(falha_rad - mta_rad))
-        if np.abs(diff_angular) <= np.pi / 2:
-            st.success(f"✅ **Análise Direcional:** O vetor de curto-circuito (Isc) está posicionado na **Zona Direta (Forward)**.")
-        else:
-            st.error(f"❌ **Análise Direcional:** O vetor de curto-circuito (Isc) está posicionado na **Zona Reversa (Reverse)**. Função 67 bloqueada.")
+            # 3. Renderização de Fundo: Zonas Direta, Reversa e Linhas de Fronteira (Quadratura)
+            if exibir_zonas:
+                # Constrói os arcos de 180° que dividem as duas metades do gráfico
+                abertura_direta = np.linspace(mta_rad - np.pi / 2, mta_rad + np.pi / 2, 100)
+                abertura_reversa = np.linspace(mta_rad + np.pi / 2, mta_rad + 3 * np.pi / 2, 100)
+                r_fundo = np.ones(100) * r_limite
+
+                # Preenche o fundo com transparência suave (alpha) para não sumir com as setas
+                ax.fill_between(abertura_direta, 0, r_fundo, color="green", alpha=0.08, label="Zona Direta (Forward)")
+                ax.fill_between(abertura_reversa, 0, r_fundo, color="red", alpha=0.04, label="Zona Reversa (Reverse)")
+
+                # Linha tracejada do Ângulo de Torque Máximo (MTA)
+                ax.plot([mta_rad, mta_rad], [0, r_limite], color="darkgreen", lw=2.0, ls="--", label=f"Linha MTA ({mta}°)")
+                # Linha ortogonal pontilhada representando a Fronteira Direcional da Quadratura
+                ax.plot([mta_rad - np.pi/2, mta_rad + np.pi/2], [r_limite, r_limite], color="black", lw=1.5, ls=":", label="Fronteira 90°")
+
+            # 4. Paleta de Cores Mapeada do seu Software de Referência
+            cores_tensoes = {"a": "#E67E22", "b": "#9B59B6", "c": "#1ABC9C"}  # Laranja, Roxo, Verde Água
+            cores_correntes = {"a": "#C0392B", "b": "#27AE60", "c": "#2980B9"} # Vermelho, Verde, Azul
+            cor_curto = "#FF5722"  # Laranja Elétrico para destacar o vetor de falta
+
+            # Função interna para desenhar os fasores
+            def desenhar_vetor(magnitude, angulo_graus, cor, nome,unidade, largura=2.5):
+                rad = np.radians(angulo_graus)
+                ax.annotate(
+                    "",
+                    xy=(rad, magnitude),
+                    xytext=(0, 0),
+                    arrowprops=dict(
+                        facecolor=cor, 
+                        edgecolor=cor, 
+                        arrowstyle="->", 
+                        lw=largura, 
+                        shrinkA=0, 
+                        shrinkB=0
+                    ),
+                )
+                texto =(
+                 f"{nome}\n"
+                f"{magnitude:.1f} {unidade} ∠ {angulo_graus:.0f}°"
+                )
+    # Posiciona o texto um pouco além da ponta
+                ax.text(
+                    rad,
+                    magnitude * 1.10,
+                    texto,
+                    color=cor,
+                    weight="bold",
+                    fontsize=8,
+                    ha="center",
+                     va="center",
+                    bbox=dict(
+                        boxstyle="round,pad=0.25",
+                        facecolor="white",
+                        edgecolor=cor,
+                        alpha=0.85
+                    )
+                )
+            # 5. Plotagem das Tensões (Va, Vb, Vc) de acordo com a seleção
+            if exibir_va and va_mag > 0: desenhar_vetor(va_mag, va_ang, cores_tensoes["a"], "Va","V")
+            if exibir_vb and vb_mag > 0: desenhar_vetor(vb_mag, vb_ang, cores_tensoes["b"], "Vb","V")
+            if exibir_vc and vc_mag > 0: desenhar_vetor(vc_mag, vc_ang, cores_tensoes["c"], "Vc","V")
+
+            # 6. Plotagem das Correntes Nominais (Ia, Ib, Ic) de acordo com a seleção
+            if exibir_ia and ia_mag > 0: desenhar_vetor(ia_mag, ia_ang, cores_correntes["a"], "Ia","A")
+            if exibir_ib and ib_mag > 0: desenhar_vetor(ib_mag, ib_ang, cores_correntes["b"], "Ib","A")
+            if exibir_ic and ic_mag > 0: desenhar_vetor(ic_mag, ic_ang, cores_correntes["c"], "Ic","A")
+
+            # 7. Plotagem da Corrente de Curto Simulada (Vetor mais espesso)
+            if exibir_isc and isc_mag > 0:
+                desenhar_vetor(isc_mag, isc_ang, cor_curto,"Isc","A)", largura=4.0)
+
+            # 8. Limpeza Visual e Ajustes Estéticos Finais
+            ax.set_yticklabels([]) 
+            ax.set_xticks(np.radians([0, 90, 180, 270]))
+            ax.set_xticklabels(["0°", "90°", "180°", "270°"], color="gray", fontsize=9)
+            ax.grid(True, alpha=0.3, color="#BDC3C7", ls="--")
+        
+            # Reposiciona a legenda para baixo do gráfico de forma organizada
+            ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.35), ncol=2, fontsize=8)
+
+            # Renderização no Streamlit
+            st.pyplot(fig)
+            plt.close()
+
+            # 9. Lógica de Diagnóstico Automatizada por Texto
+            diff_angular = np.arctan2(np.sin(falha_rad - mta_rad), np.cos(falha_rad - mta_rad))
+            if np.abs(diff_angular) <= np.pi / 2:
+                st.success(f"✅ **Análise Direcional:** O vetor de curto-circuito (Isc) está posicionado na **Zona Direta (Forward)**.")
+            else:
+                st.error(f"❌ **Análise Direcional:** O vetor de curto-circuito (Isc) está posicionado na **Zona Reversa (Reverse)**. Função 67 bloqueada.")
 
 # --- LÓGICA DA FUNÇÃO DE POTÊNCIA (32) ---
 elif funcao == "ANSI 32 (Potência Inversa)":
