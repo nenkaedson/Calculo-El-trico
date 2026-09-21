@@ -76,6 +76,7 @@ funcao = st.sidebar.radio(
         "ANSI 67 (Sobrecorrente Direcional)",
         "ANSI 67N (Sobrecorrente Direcional de Terra)",
         "ANSI 32 (Potência Inversa)",
+        "ANSI 21 (Proteção de Distância)",
         "ANSI 27 (Subtensão)",
         "ANSI 59 (Sobretensão)",
         "ANSI 87 (Proteção Diferencial Percentual)",
@@ -735,6 +736,117 @@ elif funcao == "ANSI 32 (Potência Inversa)":
         plt.grid(axis='y', ls="--", alpha=0.5)
         st.pyplot(plt.gcf())
 
+        # --- LÓGICA PARA FUNÇÃO ANSI 21 (PROTEÇÃO DE DISTÂNCIA / SUBIMPEDÂNCIA) ---
+elif funcao == "ANSI 21 (Proteção de Distância)":
+    st.sidebar.subheader("📐 Parâmetros de Distância (ANSI 21)")
+    
+    # Parâmetros de ajuste de alcance da Linha (Zonas de Proteção)
+    st.sidebar.markdown("**Ajustes de Zona (Mho)**")
+    z1_reach = st.sidebar.number_input("Alcance da Zona 1 (Z1) [Ω]:", min_value=0.1, value=4.0, step=0.5, help="Instantânea (geralmente cobrindo 80% da linha)")
+    z2_reach = st.sidebar.number_input("Alcance da Zona 2 (Z2) [Ω]:", min_value=0.1, value=6.0, step=0.5, help="Temporizada (geralmente cobrindo 120% da linha)")
+    
+    t_z2 = st.sidebar.number_input("Tempo de Atraso da Zona 2 (t_Z2) [s]:", min_value=0.0, value=0.4, step=0.1)
+    
+    # Inputs de medição em tempo real fornecidos pelos TCs e TPs do sistema
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("**⚡ Medições em Tempo Real**")
+    v_medido = st.sidebar.number_input("Tensão de Fase Medida (V RMS) [V]:", min_value=1.0, value=65.0, step=5.0)
+    i_medido = st.sidebar.number_input("Corrente de Fase Medida (I RMS) [A]:", min_value=0.1, value=15.0, step=1.0)
+    angulo_graus = st.sidebar.number_input("Ângulo entre V e I (Fase) [°]:", min_value=-180.0, max_value=180.0, value=30.0, step=5.0)
+
+    # --- PROCESSAMENTO MATEMÁTICO DA IMPEDÂNCIA APARENTE ---
+    # Conversão do ângulo para radianos para aplicar na decomposição complexa
+    angulo_rad = np.radians(angulo_graus)
+    
+    # Cálculo do módulo da impedância (Z = V / I)
+    z_modulo = v_medido / i_medido
+    
+    # Decomposição cartesiana (R + jX) para plotagem no plano R-X
+    r_medido = z_modulo * np.cos(angulo_rad)
+    x_medido = z_modulo * np.sin(angulo_rad)
+
+    # --- PROCESSAMENTO LOGICO NA TELA PRINCIPAL (COL1 E COL2) ---
+    with col1:
+        st.subheader("📊 Resultados da Proteção de Distância (ANSI 21)")
+        st.info("Princípio de Medição de Impedância de Linha:")
+        st.latex(r"Z_{aparente} = \frac{V_{fase}}{I_{fase}} = R + jX")
+        
+        # Lógica de Trip por Zona (Característica Mho Circular)
+        # Uma impedância está dentro de uma zona Mho se Z_medido <= Z_alcance * cos(theta_medido - theta_linha)
+        # Para fins didáticos e visuais diretos no plano complexo, avaliamos o módulo frente ao círculo centrado na origem:
+        if z_modulo <= z1_reach:
+            status_trip = "🚨 TRIP INSTANTÂNEO (ZONA 1)"
+            detalhe_status = "Curto-circuito severo detectado no trecho principal da linha protegido."
+            badge_html = f"<div class='trip-alert'><h3>🚨 TRIP INSTANTÂNEO TRIGERADO</h3><p>Falha crítica dentro do alcance da Zona 1. Atuação em: <strong>0.00 s</strong></p></div>"
+            cor_borda = "#d9534f"
+        elif z_modulo <= z2_reach:
+            status_trip = "⏳ TRIP TEMPORIZADO (ZONA 2)"
+            detalhe_status = f"Falha na zona de retaguarda. Temporizador ativo aguardando coordenação."
+            badge_html = f"<div class='trip-alert' style='background-color: #FF9800;'><h3>⏳ DISPARO TEMPORIZADO ATIVO</h3><p>Falha detectada na Zona 2. Coordenação em: <strong>{t_z2:.2f} s</strong></p></div>"
+            cor_borda = "#FF9800"
+        else:
+            status_trip = "✅ OPERAÇÃO ESTÁVEL"
+            detalhe_status = "Impedância vista pelo relé está na zona de carga normal (Região Segura)."
+            badge_html = "<div class='badge-status badge-success'>✅ Sistema Seguro: A impedância calculada está fora das zonas de falta.</div>"
+            cor_borda = "#4CAF50"
+
+        # Exibição nos cartões estruturados HTML do seu sistema
+        st.markdown(f"""
+        <div class='card-container'>
+            <div class='card-protecao' style='border-left-color: {cor_borda};'>
+                <h4>Impedância Calculada</h4>
+                <p>{z_modulo:.2f} <span>Ω</span></p>
+            </div>
+            <div class='card-protecao' style='border-left-color: #00bcd4;'>
+                <h4>Ponto Cartesiano</h4>
+                <p style='font-size: 1.05rem;'>{r_medido:.2f} + j{x_medido:.2f} <span>Ω</span></p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown(badge_html, unsafe_allow_html=True)
+
+    with col2:
+        st.subheader("📈 Diagrama de Impedância (Plano R-X)")
+        
+        plt.figure(figsize=(7, 4.5))
+        
+        # Desenha as características circulares (Zonas Mho simplificadas centradas na origem para exibição limpa)
+        theta_corte = np.linspace(0, 2 * np.pi, 200)
+        
+        # Zona 1
+        r_z1 = z1_reach * np.cos(theta_corte)
+        x_z1 = z1_reach * np.sin(theta_corte)
+        plt.plot(r_z1, x_z1, color="#d9534f", ls="--", lw=1.5, label=f"Zona 1 ({z1_reach}Ω)")
+        plt.fill(r_z1, x_z1, color="#d9534f", alpha=0.08)
+        
+        # Zona 2
+        r_z2 = z2_reach * np.cos(theta_corte)
+        x_z2 = z2_reach * np.sin(theta_corte)
+        plt.plot(r_z2, x_z2, color="#FF9800", ls="-.", lw=1.5, label=f"Zona 2 ({z2_reach}Ω)")
+        plt.fill(r_z2, x_z2, color="#FF9800", alpha=0.04)
+        
+        # Plota o ponto de operação medido em tempo real
+        plt.scatter([r_medido], [x_medido], color="blue", s=120, zorder=5, label=f"Z_aparente Medido")
+        # Linha vetorial (fasor) da origem até a impedância medida
+        plt.plot([0, r_medido], [0, x_medido], color="blue", lw=2, alpha=0.7)
+        
+        # Configurações do gráfico cartesiano elétrico R-X
+        plt.axhline(0, color="black", lw=1)
+        plt.axvline(0, color="black", lw=1)
+        plt.xlabel("Resistência - R (Ohms)")
+        plt.ylabel("Reatância - X (Ohms)")
+        
+        # Define limites dinâmicos para manter o ponto medido sempre visível
+        limite_grafico = max(z2_reach * 1.5, z_modulo * 1.3)
+        plt.xlim(-limite_grafico, limite_grafico)
+        plt.ylim(-limite_grafico, limite_grafico)
+        
+        plt.grid(True, ls="--", alpha=0.5)
+        plt.gca().set_aspect('equal', adjustable='box') # Mantém o círculo perfeitamente redondo
+        plt.legend(loc="upper left")
+        st.pyplot(plt.gcf())
+
 # --- LÓGICA DE PROTEÇÃO DE TENSÃO (27 / 59) ---
 elif funcao in ["ANSI 27 (Subtensão)", "ANSI 59 (Sobretensão)"]:
     st.sidebar.subheader("⚡ Parâmetros do TP e Sistema")
@@ -1013,6 +1125,8 @@ elif funcao == "ANSI 49 (Sobrecarga Térmica)":
         plt.grid(True, ls="--", alpha=0.5)
         plt.legend()
         st.pyplot(plt.gcf())
+
+
 # --- SEÇÃO DE CONTATO NO FINAL DA BARRA LATERAL ---
 st.sidebar.markdown("---")
 st.sidebar.markdown(f"""
