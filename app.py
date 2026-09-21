@@ -884,13 +884,23 @@ elif funcao == "ANSI 87 (Proteção Diferencial Percentual)":
 elif funcao == "ANSI 49 (Sobrecarga Térmica)":
     st.sidebar.subheader("🔥 Parâmetros de Imagem Térmica (49)")
     
-    fabricante = st.sidebar.selectbox("Modelo/Fabricante do Relé:", ["Schneider Sepam", "Siemens (Siprotec/Reyrolle)", "GE Multilin", "Pextron (Réplica IEC)"])
+    # Atualizado para incluir o modelo Inepar PM II no seu padrão de selectbox
+    fabricante = st.sidebar.selectbox("Modelo/Fabricante do Relé:", ["Schneider Sepam", "Siemens (Siprotec/Reyrolle)", "GE Multilin", "Pextron (Réplica IEC)", "BBC Brown Boveri (Tipo ST)", "Inepar PM II (Proteção de Motores)"])
     
     i_b = st.sidebar.number_input("Corrente de Base / Nominal (I_b) [A]:", min_value=0.1, value=3.0, step=0.5)
-    tau = st.sidebar.number_input("Constante de Tempo de Aquecimento (τ) [segundos]:", min_value=1.0, value=1200.0, step=10.0)
-    es = st.sidebar.number_input("Capacidade Térmica de Disparo (Es) [%]:", min_value=1.0, max_value=200.0, value=50.0, step=5.0) / 100.0
+    
+    # Configuração de constantes default para o modelo Inepar PM II (Constantes de motor costumam ser longas)
+    val_tau_padrao = 2400.0 if fabricante == "Inepar PM II (Proteção de Motores)" else 1200.0
+    if fabricante == "BBC Brown Boveri (Tipo ST)": val_tau_padrao = 2400.0
+        
+    tau = st.sidebar.number_input("Constante de Tempo de Aquecimento (τ) [segundos]:", min_value=1.0, value=val_tau_padrao, step=10.0)
+    
+    val_es_padrao = 100.0 if fabricante in ["BBC Brown Boveri (Tipo ST)", "Inepar PM II (Proteção de Motores)"] else 50.0
+    es = st.sidebar.number_input("Capacidade Térmica de Disparo (Es) [%]:", min_value=1.0, max_value=200.0, value=val_es_padrao, step=5.0) / 100.0
+    
     e_inicial = st.sidebar.number_input("Estado Térmico Inicial (E_inicial) [%]:", min_value=0.0, max_value=100.0, value=0.0, step=5.0) / 100.0
 
+    # --- CONDICIONAIS DE REGIME DE CADA FABRICANTE ---
     if fabricante == "Schneider Sepam":
         st.sidebar.markdown("**Abordagem Sepam:** Utiliza a maior corrente RMS medida entre as fases.")
         i_eq_medida = st.sidebar.number_input("Corrente RMS Máxima Medida (I_eq) [A]:", min_value=0.1, value=6.0, step=0.5)
@@ -917,15 +927,36 @@ elif funcao == "ANSI 49 (Sobrecarga Térmica)":
         st.sidebar.info(f"I_eq Térmica Calculada (GE Multilin): {i_eq_ge:.2f} A")
         razao_corrente = i_eq_ge / i_b
 
+    elif fabricante == "BBC Brown Boveri (Tipo ST)":
+        st.sidebar.markdown("**Abordagem BBC ST:** Modelo clássico baseado na constante térmica bimetálica com correção opcional.")
+        i_bbc = st.sidebar.number_input("Corrente RMS Medida de Carga (I) [A]:", min_value=0.1, value=5.0, step=0.5)
+        correcao_ferro = st.sidebar.checkbox("Aplicar Correção por Perdas no Ferro (Fig. 15)", value=True)
+        if correcao_ferro and e_inicial < 0.20:
+            e_inicial = 0.20
+            st.sidebar.caption("💡 *E_inicial ajustado automaticamente para 20% devido às perdas no ferro.*")
+        razao_corrente = i_bbc / i_b
+
+    elif fabricante == "Inepar PM II (Proteção de Motores)":
+        st.sidebar.markdown("**Abordagem Inepar PM II:** Modelo para motores térmicos. Pondera o aquecimento assimétrico severo do rotor via corrente I2.")
+        i_fase_max = st.sidebar.number_input("Maior Corrente de Fase (I_fase) [A]:", min_value=0.1, value=6.0, step=0.5)
+        i2_deseq = st.sidebar.number_input("Corrente de Sequência Negativa (I2) [A]:", min_value=0.0, value=0.5, step=0.1)
+        k_rotor = st.sidebar.number_input("Fator de Ponderação do Rotor (K_rotor):", min_value=1.0, max_value=6.0, value=3.5, step=0.5)
+        
+        # Equação oficial do estresse térmico composto do rotor Inepar PM II
+        i_eq_inepar = np.sqrt(i_fase_max**2 + (k_rotor * (i2_deseq**2)))
+        st.sidebar.info(f"I_eq Térmica Calculada (Inepar PM II): {i_eq_inepar:.2f} A")
+        razao_corrente = i_eq_inepar / i_b
+
     else:
         st.sidebar.markdown("**Abordagem Pextron:** Modelo de imagem térmica baseado na norma IEC 60255-149.")
         i_pextron = st.sidebar.number_input("Corrente Equivalente de Fase Medida (I) [A]:", min_value=0.1, value=6.0, step=0.5)
         razao_corrente = i_pextron / i_b
 
+    # --- BLOCO DE RESULTADOS (COL1 E COL2 MANTIDOS INTEGRALMENTE NO SEU PADRÃO) ---
     with col1:
         st.subheader(f"📊 Resultados da ANSI 49 ({fabricante})")
         st.info("Fórmula de Imagem Térmica Utilizada:")
-        if fabricante in ["Schneider Sepam", "Pextron (Réplica IEC)"]:
+        if fabricante in ["Schneider Sepam", "Pextron (Réplica IEC)", "BBC Brown Boveri (Tipo ST)", "Inepar PM II (Proteção de Motores)"]:
             st.latex(r"t = \tau \cdot \ln\left( \frac{(I_{eq}/I_b)^2 - E_{inicial}}{(I_{eq}/I_b)^2 - Es} \right)")
         elif fabricante == "Siemens (Siprotec/Reyrolle)":
             st.latex(r"I_{eq}^2 = I_1^2 + (k_2 \cdot I_2^2)")
@@ -982,3 +1013,14 @@ elif funcao == "ANSI 49 (Sobrecarga Térmica)":
         plt.grid(True, ls="--", alpha=0.5)
         plt.legend()
         st.pyplot(plt.gcf())
+# --- SEÇÃO DE CONTATO NO FINAL DA BARRA LATERAL ---
+st.sidebar.markdown("---")
+st.sidebar.markdown(f"""
+<div style='background-color: #1E1E1E; padding: 15px; border-radius: 8px; border: 1px solid #4F4F4F; text-align: center;'>
+    <h4 style='margin: 0; color: #FF5722;'>📬 Dúvidas ou Suporte?</h4>
+    <p style='font-size: 0.9rem; color: #CCCCCC; margin: 10px 0 5px 0;'>Entre em contato com o desenvolvedor:</p>
+    <p style='font-size: 1rem; font-weight: bold; margin: 0; color: #FFFFFF;'>Edson Silva</p>
+    <p style='font-size: 0.85rem; margin: 5px 0 0 0; color: #00bcd4;'>edsn_silva@outlook.com</p>
+    <p style='font-size: 0.85rem; margin: 2px 0 0 0; color: #4CAF50;'>+55 (19) 98360-1032</p>
+</div>
+""", unsafe_allow_html=True)
