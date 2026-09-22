@@ -165,3 +165,32 @@ div[data-testid="collapsedControl"] button {
     font-size: 20px !important;
     color: var(--text-color) !important; /* Ajusta automaticamente para branco no fundo escuro */
 }
+
+/* Paramentros contato */
+.subtitulo-titulo-Dúvidas ou Suporte{
+    font-size: 1.1rem !important;
+    color: var(--secondary-text-color) !important; /* Adapta-se automaticamente ao tema da tela */
+    margin-top: 0px !important;
+}
+.subtitulo-subtitulo-Entre em contato com o desenvolvedor{
+    font-size: 1.1rem !important;
+    color: var(--secondary-text-color) !important; /* Adapta-se automaticamente ao tema da tela */
+    margin-top: 0px !important;
+}
+.subtitulo-subtitulo-Nome{
+    font-size: 1.1rem !important;
+    color: var(--secondary-text-color) !important; /* Adapta-se automaticamente ao tema da tela */
+    margin-top: 0px !important;
+}
+.subtitulo-subtitulo-Email{
+    font-size: 1.1rem !important;
+    color: var(--secondary-text-color) !important; /* Adapta-se automaticamente ao tema da tela */
+    margin-top: 0px !important;
+}
+.subtitulo-subtitulo-Telefone{
+    font-size: 1.1rem !important;
+    color: var(--secondary-text-color) !important; /* Adapta-se automaticamente ao tema da tela */
+    margin-top: 0px !important;
+}
+
+
