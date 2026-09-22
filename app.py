@@ -1128,26 +1128,26 @@ elif funcao == "ANSI 49 (Sobrecarga Térmica)":
 
 
 # --- SEÇÃO DE CONTATO NO FINAL DA BARRA LATERAL ---
- # st.markdown(
+st.markdown(
     """
-   # <div class="header-contato">
-    #      <h4 class="titulo-Dúvidas ou Suporte"> Dúvidas ou Suporte</h4>
-     #     <p class="subtitulo-Entre em contato com o desenvolvedor">Entre em contato com o desenvolvedor</p>
-      #    <p class="subtitulo-Nome">Edson Silva</p>
-      #    <p class="subtitulo-Email">edsn_silva@outlook.com</p>
-       #   <p class="subtitulo-Telefone">+55 (19) 98360-1032</p>
-    #  </div>
-    #  """, 
-    #  unsafe_allow_html=True
- # )
+    <div class="header-contato">
+        <h4 class="titulo-suporte">Dúvidas ou Suporte</h4>
+        <p class="subtitulo-info">Entre em contato com o desenvolvedor</p>
+        <p class="subtitulo-info subtitulo-destaque">Edson Silva</p>
+        <p class="subtitulo-info">edsn_silva@outlook.com</p>
+        <p class="subtitulo-info">+55 (19) 98360-1032</p>
+    </div>
+    """, 
+    unsafe_allow_html=True
+)
 
-st.sidebar.markdown("---")
-st.sidebar.markdown(f"""
-<div style='background-color: #1E1E1E; padding: 15px; border-radius: 8px; border: 1px solid #4F4F4F; text-align: center;'>
-    <h4 style='margin: 0; color: #FF5722;'>📬 Dúvidas ou Suporte?</h4>
-   <p style='font-size: 0.9rem; color: #CCCCCC; margin: 10px 0 5px 0;'>Entre em contato com o desenvolvedor:</p>
-    <p style='font-size: 1rem; font-weight: bold; margin: 0; color: #FFFFFF;'>Edson Silva</p>
-    <p style='font-size: 0.85rem; margin: 5px 0 0 0; color: #00bcd4;'>edsn_silva@outlook.com</p>
-   <p style='font-size: 0.85rem; margin: 2px 0 0 0; color: #4CAF50;'>+55 (19) 98360-1032</p>
-</div>
-""", unsafe_allow_html=True)
+#st.sidebar.markdown("---")
+#st.sidebar.markdown(f"""
+#<div style='background-color: #1E1E1E; padding: 15px; border-radius: 8px; border: 1px solid #4F4F4F; text-align: center;'>
+ #   <h4 style='margin: 0; color: #FF5722;'>📬 Dúvidas ou Suporte?</h4>
+  # <p style='font-size: 0.9rem; color: #CCCCCC; margin: 10px 0 5px 0;'>Entre em contato com o desenvolvedor:</p>
+   # <p style='font-size: 1rem; font-weight: bold; margin: 0; color: #FFFFFF;'>Edson Silva</p>
+    #<p style='font-size: 0.85rem; margin: 5px 0 0 0; color: #00bcd4;'>edsn_silva@outlook.com</p>
+   #<p style='font-size: 0.85rem; margin: 2px 0 0 0; color: #4CAF50;'>+55 (19) 98360-1032</p>
+#</div>
+#""", unsafe_allow_html=True)
