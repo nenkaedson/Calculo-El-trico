@@ -1131,7 +1131,7 @@ elif funcao == "ANSI 49 (Sobrecarga Térmica)":
 st.markdown(
     """
     <div class="header-contato">
-        <h4 class="titulo- Dúvidas ou Suporte"> Dúvidas ou Suporte</h4>
+        <h4 class="titulo-Dúvidas ou Suporte"> Dúvidas ou Suporte</h4>
         <p class="subtitulo-Entre em contato com o desenvolvedor">Entre em contato com o desenvolvedor</p>
         <p class="subtitulo-Nome">Edson Silva</p>
         <p class="subtitulo-Email">edsn_silva@outlook.com</p>
