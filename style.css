@@ -165,28 +165,69 @@ div[data-testid="collapsedControl"] button {
     font-size: 20px !important;
     color: var(--text-color) !important; /* Ajusta automaticamente para branco no fundo escuro */
 }
+/* Parametros de ajuste contatos*/
+/* Configurações Globais do Card */
+.card-contato {
+    background-color: #f8f9fa; /* Cor de fundo clara */
+    border: 1px solid #e9ecef; /* Borda sutil */
+    border-radius: 10px;       /* Bordas arredondadas */
+    padding: 16px;             /* Espaçamento interno */
+    margin-bottom: 20px;       /* Margem inferior */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); /* Sombra leve */
+    font-family: 'Source Sans Pro', sans-serif;
+}
 
-/* Paramentros contato */
- .header-contato {
-        background-color: #1E1E1E;
-        padding: 15px;
-        border-radius: 8px;
-        border: 1px solid #4F4F4F;
-        text-align: center;
-        #margin-bottom: 20px;
-    }
-    .titulo-suporte {
-        color: #FFFFFF !important;
-        margin-bottom: 10px !important;
-        font-weight: bold;
-    }
-    .subtitulo-info {
-        color: #CCCCCC !important;
-        margin: 5px 0 !important;
-        font-size: 14px;
-    }
-    .subtitulo-destaque {
-        color: #00A3E0 !important; /* Cor de destaque para o nome/contatos, ajuste se quiser */
-        font-weight: 500;
-    }
+/* Título do Card */
+.card-contato h4 {
+    color: #1E3A8A;            /* Azul escuro profissional */
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
 
+/* Textos Gerais */
+.card-contato p {
+    color: #4B5563;            /* Cinza escuro para boa leitura */
+    font-size: 0.9rem;
+    margin: 4px 0;
+    line-height: 1.4;
+}
+
+/* Destaque no Nome do Desenvolvedor */
+.card-contato .nome {
+    font-weight: bold;
+    color: #111827;            /* Quase preto */
+    font-size: 0.95rem;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+/* Estilização Base dos Links (E-mail e Telefone) */
+.card-contato a {
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-block;
+    margin-top: 2px;
+    transition: color 0.2s ease-in-out;
+}
+
+/* Link de E-mail */
+.card-contato a.email {
+    color: #2563EB;            /* Azul clássico de link */
+}
+
+.card-contato a.email:hover {
+    color: #1D4ED8;            /* Azul mais escuro no hover */
+    text-decoration: underline;
+}
+
+/* Link do WhatsApp (Telefone) */
+.card-contato a.telefone {
+    color: #16A34A;            /* Verde característico do WhatsApp */
+}
+
+.card-contato a.telefone:hover {
+    color: #15803D;            /* Verde mais escuro no hover */
+    text-decoration: underline;
+}
